@@ -24,7 +24,7 @@ import (
 func main() {
 	sft := stockholmfoodtrucks.NewClient()
 
-	trucks, err := sft.Get()
+	trucks, err := sft.All()
 	if err == nil {
 		for _, truck := range trucks {
 			fmt.Printf("## %s\n%s\n\n", truck.Name, truck.Text)

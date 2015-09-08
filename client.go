@@ -4,27 +4,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
-
-// FoodTruck contains the information for a food truck
-type FoodTruck struct {
-	Name     string    `json:"name"`
-	Text     string    `json:"text"`
-	Time     time.Time `json:"time"`
-	TimeText string    `json:"time_text"`
-	Location *Location `json:"location"`
-}
-
-// Location contains the location information for a food truck
-type Location struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Text string `json:"text"`
-	Type string `json:"type"`
-}
 
 // A Client communicates with stockholmfoodtrucks.nu
 type Client struct {
@@ -90,56 +72,6 @@ func (c *Client) NewDocument() (*goquery.Document, error) {
 	defer res.Body.Close()
 
 	return goquery.NewDocumentFromResponse(res)
-}
-
-// Get returns a slice of FoodTruck
-func (c *Client) Get() ([]FoodTruck, error) {
-	doc, err := c.NewDocument()
-	if err != nil {
-		return nil, err
-	}
-
-	return c.FoodTrucks(doc)
-}
-
-// FoodTrucks extracts slice of food trucks from goquery document
-func (c *Client) FoodTrucks(doc *goquery.Document) ([]FoodTruck, error) {
-	foodTrucks := []FoodTruck{}
-
-	doc.Find(".trucks-list .truck").Each(func(i int, s *goquery.Selection) {
-		truckName := s.Find(".truck-name").Text()
-
-		post := s.Find(".posts .post").First()
-		truckText := post.Find(".content").Text()
-		truckTime, _ := time.Parse("2006-01-02 15:04", post.Find(".meta a").First().AttrOr("title", ""))
-		truckTimeText := post.Find(".meta a").First().Text()
-
-		foodTruck := FoodTruck{
-			Name:     truckName,
-			Text:     truckText,
-			Time:     truckTime,
-			TimeText: truckTimeText,
-		}
-
-		location := post.Find(".content .location").First()
-
-		if id, exists := location.Attr("data-id"); exists {
-			if n, exists := location.Attr("data-name"); exists {
-				if t, exists := location.Attr("data-type"); exists {
-					foodTruck.Location = &Location{
-						ID:   id,
-						Name: n,
-						Type: t,
-						Text: location.Text(),
-					}
-				}
-			}
-		}
-
-		foodTrucks = append(foodTrucks, foodTruck)
-	})
-
-	return foodTrucks, nil
 }
 
 // Env returns a string from the ENV, or fallback variable
