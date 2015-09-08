@@ -5,23 +5,33 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
+
 	"github.com/PuerkitoBio/goquery"
 )
 
+// ErrFoodTruckNotFound is returned when no food truck was found
+var ErrFoodTruckNotFound = fmt.Errorf(`Food truck not found`)
+
 // FoodTruck contains the information for a food truck
 type FoodTruck struct {
-	Name      string    `json:"name"`
-	Text      string    `json:"text"`
-	TimeText  string    `json:"time_text"`
-	Time      time.Time `json:"time"`
-	Location  *Location `json:"location"`
-	Slug      string    `json:"slug"`
-	Hex       string    `json:"hex"`
-	Facebook  string    `json:"facebook"`
-	Instagram string    `json:"instagram"`
-	Twitter   string    `json:"twitter"`
+	Name        string    `json:"name"`
+	Text        string    `json:"text"`
+	TimeText    string    `json:"time_text"`
+	Time        time.Time `json:"time"`
+	Location    *Location `json:"location"`
+	Slug        string    `json:"slug"`
+	Hex         string    `json:"hex"`
+	Facebook    string    `json:"facebook"`
+	Instagram   string    `json:"instagram"`
+	Twitter     string    `json:"twitter"`
+	Web         string    `json:"web"`
+	Description []string  `json:"description"`
+	Menu        []string  `json:"menu"`
 }
 
+// Pic returns the link to the food truck image
 func (ft FoodTruck) Pic() string {
 	return fmt.Sprintf("http://stockholmfoodtrucks.nu/img-dist/%s.png", ft.Slug)
 }
@@ -36,12 +46,75 @@ type Location struct {
 
 // All returns a slice of FoodTruck
 func (c *Client) All() ([]FoodTruck, error) {
-	doc, err := c.NewDocument()
+	doc, err := c.NewDocument("")
 	if err != nil {
 		return nil, err
 	}
 
 	return c.FoodTrucks(doc)
+}
+
+// Get returns a FoodTruck
+func (c *Client) Get(slug string) (FoodTruck, error) {
+	doc, err := c.NewDocument("/" + slug + "/")
+	if err != nil || !doc.Find(".single-truck").Is(".single-truck") {
+		return FoodTruck{}, ErrFoodTruckNotFound
+	}
+
+	return c.FoodTruck(doc, slug)
+}
+
+// FoodTruck extracts food truck from goquery document
+func (c *Client) FoodTruck(doc *goquery.Document, slug string) (FoodTruck, error) {
+	t := doc.Find(".single-truck")
+
+	truckName := t.Find(".truck-content .main-title").Text()
+	truckText := ""
+
+	for _, n := range t.Find(".truck-post .bubble-inner *").Nodes {
+		if n.Type == html.TextNode && n.PrevSibling != nil && n.PrevSibling.DataAtom == atom.Br {
+			truckText += strings.Trim(n.Data, "\n ") + "\n"
+		}
+	}
+
+	truckMenu := []string{}
+
+	t.Find(".truck-content .menu ul li").Each(func(i int, s *goquery.Selection) {
+		truckMenu = append(truckMenu, s.Text())
+	})
+
+	truckFacebook := t.Find(".truck-content .main a.facebook").AttrOr("href", "")
+	truckInstagram := t.Find(".truck-content .main a.instagram").AttrOr("href", "")
+	truckTwitter := t.Find(".truck-content .main a.twitter").AttrOr("href", "")
+	truckWeb := t.Find(".truck-content .main a.web").AttrOr("href", "")
+
+	truckDescription := []string{}
+
+	t.Find(".truck-content .main p").Each(func(i int, s *goquery.Selection) {
+		if !s.Children().HasClass("link-to") {
+			truckDescription = append(truckDescription, s.Text())
+		}
+	})
+
+	truckTime, _ := time.Parse("2006-01-02 15:04", t.Find(".meta a").First().AttrOr("title", ""))
+	truckTimeText := t.Find(".meta a").First().Text()
+
+	foodTruck := FoodTruck{
+		Slug:        slug,
+		Name:        truckName,
+		Hex:         nameToHex(truckName),
+		Text:        truckText,
+		Menu:        truckMenu,
+		Facebook:    truckFacebook,
+		Instagram:   truckInstagram,
+		Twitter:     truckTwitter,
+		Web:         truckWeb,
+		Description: truckDescription,
+		Time:        truckTime,
+		TimeText:    truckTimeText,
+	}
+
+	return foodTruck, nil
 }
 
 // FoodTrucks extracts slice of food trucks from goquery document
