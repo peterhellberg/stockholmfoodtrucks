@@ -40,8 +40,8 @@ func NewClient(httpClients ...*http.Client) *Client {
 }
 
 // NewRequest creates a new request to stockholmfoodtrucks.nu
-func (c *Client) NewRequest() (*http.Request, error) {
-	req, err := http.NewRequest("GET", c.URL.String(), nil)
+func (c *Client) NewRequest(path string) (*http.Request, error) {
+	req, err := http.NewRequest("GET", c.URL.String()+path, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -59,8 +59,8 @@ func (c *Client) Do(req *http.Request) (*http.Response, error) {
 }
 
 // NewDocument returns a goquery document based on stockholmfoodtrucks.nu
-func (c *Client) NewDocument() (*goquery.Document, error) {
-	req, err := c.NewRequest()
+func (c *Client) NewDocument(path string) (*goquery.Document, error) {
+	req, err := c.NewRequest(path)
 	if err != nil {
 		return nil, err
 	}
