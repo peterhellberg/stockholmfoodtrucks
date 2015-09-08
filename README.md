@@ -30,6 +30,11 @@ func main() {
 			fmt.Printf("## %s\n%s\n\n", truck.Name, truck.Text)
 		}
 	}
+
+	truck, err := sft.Get("jeffreys-food-truck")
+	if err == nil {
+		fmt.Printf("# %s\nLocation: %+v\nData: %+v\n\n", truck.Name, truck.Location, truck)
+	}
 }
 ```
 
