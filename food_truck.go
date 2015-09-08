@@ -33,6 +33,10 @@ type FoodTruck struct {
 
 // Pic returns the link to the food truck image
 func (ft FoodTruck) Pic() string {
+	if ft.Slug == "" {
+		return ""
+	}
+
 	return fmt.Sprintf("http://stockholmfoodtrucks.nu/img-dist/%s.png", ft.Slug)
 }
 
