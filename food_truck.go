@@ -114,6 +114,21 @@ func (c *Client) FoodTruck(doc *goquery.Document, slug string) (FoodTruck, error
 		TimeText:    truckTimeText,
 	}
 
+	location := t.Find(".bubble-inner .location").First()
+
+	if id, exists := location.Attr("data-id"); exists {
+		if n, exists := location.Attr("data-name"); exists {
+			if t, exists := location.Attr("data-type"); exists {
+				foodTruck.Location = &Location{
+					ID:   id,
+					Name: n,
+					Type: t,
+					Text: location.Text(),
+				}
+			}
+		}
+	}
+
 	return foodTruck, nil
 }
 
