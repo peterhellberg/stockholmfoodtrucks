@@ -25,7 +25,7 @@ func NewClient(httpClients ...*http.Client) *Client {
 	cloned := *http.DefaultClient
 	httpClient := &cloned
 
-	if len(httpClients) > 0 {
+	if len(httpClients) > 0 && httpClients[0] != nil {
 		httpClient = httpClients[0]
 	}
 
