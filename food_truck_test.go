@@ -217,6 +217,7 @@ func TestNameToHex(t *testing.T) {
 		{"Chilibussen", "#f2900c"},
 		{"El Taco Truck", "#f38ab3"},
 		{"Foo Bar", "#000000"},
+		{"Punto Sur", "#b71c27"},
 	} {
 		if got := nameToHex(tt.in); got != tt.want {
 			t.Fatalf(`[%d] nameToHex(%q) = %q, want %q`, i, tt.in, got, tt.want)
