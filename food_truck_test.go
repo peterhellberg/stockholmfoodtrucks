@@ -40,6 +40,7 @@ func TestAll(t *testing.T) {
 			<h2 class="truck-name"><a href="/bun-bun-truck/">Bun Bun Truck</a></h2>
 			<ul class="posts">
 				<li class="post old-post">
+					<img src="https://scontent.xx.fbcdn.net/hphotos-xla1/v/t1.0-0/s130x130/11219535_1061498343884929_7491271514670410043_n.jpg?oh=75535cd7972e79d9737ff57b3796013b&amp;oe=56925E0A" alt="" class="image js-overlay-image" data-image="https://scontent.xx.fbcdn.net/hphotos-xla1/v/t1.0-9/s720x720/11219535_1061498343884929_7491271514670410043_n.jpg?oh=52ed56d3f7e9dffb7418129754c92e42&amp;oe=5665561F">
 					<span class="content">Pling, hej söndag! Vi är lite möra (och glada) efter stöket på Popaganda igår men masar oss iväg till <span class="location js-location" data-id="1048" data-name="Hornstulls marknad" data-type="event" data-coordinates="{&quot;lat&quot;:&quot;59.3151364&quot;,&quot;lng&quot;:&quot;18.0308404&quot;}">Hornstulls Marknad</span> ändå! Ses!</span>
 					<span class="meta">
           	<a href="/bun-bun-truck/pling-hej-sondag-vi-ar-lite-mora-och-glada-efter/" class="date" title="2015-08-30 10:42">9 dagar sedan</a>
@@ -86,6 +87,14 @@ func TestAll(t *testing.T) {
 
 	if got, want := trucks[1].Slug, "bun-bun-truck"; got != want {
 		t.Fatalf(`trucks[1].Slug = %q, want %q`, got, want)
+	}
+
+	if got, want := trucks[0].Image, ""; got != want {
+		t.Fatalf(`trucks[0].Image = %q, want %q`, got, want)
+	}
+
+	if got, want := trucks[1].Image, "https://scontent.xx.fbcdn.net/hphotos-xla1/v/t1.0-9/s720x720/11219535_1061498343884929_7491271514670410043_n.jpg?oh=52ed56d3f7e9dffb7418129754c92e42&oe=5665561F"; got != want {
+		t.Fatalf(`trucks[1].Image = %q, want %q`, got, want)
 	}
 
 	if got, want := trucks[0].TimeText, "4 dagar sedan"; got != want {
@@ -158,6 +167,10 @@ func TestGet(t *testing.T) {
 
 	if got, want := truck.Name, "Bun Bun Truck"; got != want {
 		t.Fatalf(`truck.Name = %q, want %q`, got, want)
+	}
+
+	if got, want := truck.Image, "https://scontent.xx.fbcdn.net/hphotos-xpt1/v/t1.0-9/s720x720/1898063_1051737591527671_2838314519516257804_n.jpg?oh=679bd247c4065e6ba433d609f5acb8d1&oe=56627C92"; got != want {
+		t.Fatalf(`truck.Image = %q, want %q`, got, want)
 	}
 
 	if got, want := truck.Hex, "#bfecea"; got != want {

@@ -21,6 +21,7 @@ type FoodTruck struct {
 	TimeText    string    `json:"time_text"`
 	Time        time.Time `json:"time"`
 	Location    *Location `json:"location"`
+	Image       string    `json:"image"`
 	Slug        string    `json:"slug"`
 	Hex         string    `json:"hex"`
 	Facebook    string    `json:"facebook"`
@@ -73,6 +74,7 @@ func (c *Client) FoodTruck(doc *goquery.Document, slug string) (FoodTruck, error
 	t := doc.Find(".single-truck")
 
 	truckName := t.Find(".truck-content .main-title").Text()
+	truckImage := t.Find(".bubble-inner .js-overlay-image").First().AttrOr("data-image", "")
 	truckText := ""
 
 	for _, n := range t.Find(".truck-post .bubble-inner *").Nodes {
@@ -106,6 +108,7 @@ func (c *Client) FoodTruck(doc *goquery.Document, slug string) (FoodTruck, error
 	foodTruck := FoodTruck{
 		Slug:        slug,
 		Name:        truckName,
+		Image:       truckImage,
 		Hex:         nameToHex(truckName),
 		Text:        truckText,
 		Menu:        truckMenu,
@@ -145,6 +148,7 @@ func (c *Client) FoodTrucks(doc *goquery.Document) ([]FoodTruck, error) {
 		truckSlug := strings.Trim(s.Find(".truck-name a").AttrOr("href", ""), "/")
 
 		post := s.Find(".posts .post").First()
+		truckImage := post.Find(".js-overlay-image").First().AttrOr("data-image", "")
 		truckText := post.Find(".content").Text()
 		truckTime, _ := time.Parse("2006-01-02 15:04", post.Find(".meta a").First().AttrOr("title", ""))
 		truckTimeText := post.Find(".meta a").First().Text()
@@ -152,6 +156,7 @@ func (c *Client) FoodTrucks(doc *goquery.Document) ([]FoodTruck, error) {
 		foodTruck := FoodTruck{
 			Name:     truckName,
 			Slug:     truckSlug,
+			Image:    truckImage,
 			Hex:      nameToHex(truckName),
 			Text:     truckText,
 			Time:     truckTime,
